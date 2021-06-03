@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import User
+from django.contrib.auth import authenticate
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -17,3 +18,32 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
+
+
+class LoginSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['email', 'username', 'password', 'token']
+
+    def validate(self, data):
+        email = data.get('email', None)
+        password = data.get('password', None)
+
+        if email is None:
+            raise serializers.ValidationError('An email address is required to login')
+        if password is None:
+            raise serializers.ValidationError('A password is required to login')
+
+        user = authenticate(username=email, password=password)
+
+        if user is None:
+            raise serializers.ValidationError(' A user with this email and password was not found')
+
+        if not user.is_active:
+            raise serializers.ValidationError('This user has been deactivated.')
+
+        return {
+            'email': user.email,
+            'username': user.username,
+            'token': user.token
+        }

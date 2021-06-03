@@ -6,7 +6,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import CreateAPIView
-from .serializers import RegistrationSerializer
+from .serializers import RegistrationSerializer, LoginSerializer
 from .models import User
 
 
@@ -19,17 +19,25 @@ class RegistrationAPIView(CreateAPIView):
     permission_classes = (AllowAny, )
     serializer_class = RegistrationSerializer
     queryset = User.objects.all()
-    # parser_classes = (FormParser, JsonParser)
 
-    def post(self, request, *args, **kwargs):
-        user = request.data.get('user', {})
-
-        serializer = self.serializer_class(data=user)
+    def post(self, request, *args):
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        # return Response(seializer.data, status=status.HTTP_201_CREATED)
 
+class LoginAPIView(CreateAPIView):
+    permission_classes = (AllowAny, )
+    serializer_class = LoginSerializer
+    queryset = User.objects.all()
+
+    def post(self, request, *args):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
