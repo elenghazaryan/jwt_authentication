@@ -20,10 +20,11 @@ class RegistrationSerializer(serializers.ModelSerializer):
         return User.objects.create_user(**validated_data)
 
 
-class LoginSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['email', 'username', 'password', 'token']
+class LoginSerializer(serializers.Serializer):
+    email = serializers.CharField(max_length=255)
+    username = serializers.CharField(max_length=255, read_only=True)
+    password = serializers.CharField(max_length=128, write_only=True)
+    token = serializers.CharField(max_length=255, read_only=True)
 
     def validate(self, data):
         email = data.get('email', None)
@@ -47,3 +48,12 @@ class LoginSerializer(serializers.ModelSerializer):
             'username': user.username,
             'token': user.token
         }
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username']
+
+
+
